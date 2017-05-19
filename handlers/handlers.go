@@ -29,3 +29,13 @@ func MainHandler(w http.ResponseWriter, r *http.Request) {
 
 	writeJSON(w, data)
 }
+
+// GetCategoriesHandler returns a list of categories
+func GetCategoriesHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("GET /categories")
+	arr := []models.ItemCategory{
+		models.ItemCategory{ID: 1, Name: "Plywood", ParentID: 0},
+	}
+	data := models.Response{Err: 0, Message: "", Data: arr}
+	writeJSON(w, data)
+}
