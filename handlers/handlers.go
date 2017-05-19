@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"net/http"
 	"simple-inventory/models"
-	// Import mysql driver
+
 	"log"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql" // Import mysql driver
 )
 
 var db *sql.DB
