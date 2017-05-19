@@ -1,11 +1,26 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"simple-inventory/models"
+	// Import mysql driver
+	"log"
+
+	_ "github.com/go-sql-driver/mysql"
 )
+
+var db *sql.DB
+
+func init() {
+	var err error
+	db, err = sql.Open("mysql", "root@/inventory_v1")
+	if err != nil {
+		panic(err.Error())
+	}
+}
 
 func writeJSON(w http.ResponseWriter, response models.Response) (err error) {
 	res, err := json.Marshal(response)
@@ -32,10 +47,29 @@ func MainHandler(w http.ResponseWriter, r *http.Request) {
 
 // GetCategoriesHandler returns a list of categories
 func GetCategoriesHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("GET /categories")
-	arr := []models.ItemCategory{
-		models.ItemCategory{ID: 1, Name: "Plywood", ParentID: 0},
+	fmt.Println("GET /categories. GET params were: ", r.URL.Query())
+	var arr []models.ItemCategory
+
+	rows, err := db.Query("SELECT * FROM categories;")
+
+	if err != nil {
+		log.Fatal(err)
 	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var id int
+		var name string
+		var parentID int
+		err := rows.Scan(&id, &name, &parentID)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		arr = append(arr, models.ItemCategory{Name: name, ID: id, ParentID: parentID})
+	}
+
 	data := models.Response{Err: 0, Message: "", Data: arr}
 	writeJSON(w, data)
 }
