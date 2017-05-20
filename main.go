@@ -14,6 +14,7 @@ func main() {
 	r.HandleFunc("/", handlers.MainHandler)
 	r.HandleFunc("/api/categories", handlers.GetCategoriesHandler).Methods("GET")
 	r.HandleFunc("/api/categories", handlers.CreateCategoryHandler).Methods("POST")
+	r.HandleFunc("/api/categories/{id}", handlers.DeleteCategoryHandler).Methods("DELETE")
 
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(":8080", nil))

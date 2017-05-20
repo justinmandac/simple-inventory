@@ -7,7 +7,10 @@ import (
 	"net/http"
 	"simple-inventory/models"
 
+	"strconv"
+
 	_ "github.com/go-sql-driver/mysql" // Import mysql driver
+	"github.com/gorilla/mux"
 )
 
 var db *sql.DB
@@ -99,6 +102,33 @@ func CreateCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	decoder.Decode(&category)
 	err := createCategory(category)
 
+	if err != nil {
+		data := models.Response{Err: 1, Message: err.Error(), Data: nil}
+		writeJSON(w, data)
+		return
+	}
+
+	data := models.Response{Err: 0, Message: "ok", Data: nil}
+	writeJSON(w, data)
+}
+
+func deleteCategory(id int) error {
+	query := "DELETE FROM `categories` WHERE id=?"
+	_, err := db.Query(query, id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// DeleteCategoryHandler - deletes category
+func DeleteCategoryHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("DELETE /categories")
+	vars := mux.Vars(r)
+	id, _ := strconv.ParseInt(vars["id"], 10, 64) // the category id
+	err := deleteCategory(int(id))
 	if err != nil {
 		data := models.Response{Err: 1, Message: err.Error(), Data: nil}
 		writeJSON(w, data)
