@@ -79,3 +79,32 @@ func GetCategoriesHandler(w http.ResponseWriter, r *http.Request) {
 	data := models.Response{Err: 0, Message: "", Data: arr}
 	writeJSON(w, data)
 }
+
+func createCategory(category models.ItemCategory) error {
+	query := "INSERT INTO `categories`(`name`, `parentID`) VALUES (?, ?)"
+	_, err := db.Exec(query, category.Name, category.ParentID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CreateCategoryHandler creates a new category.
+func CreateCategoryHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("POST /categories.")
+	var category models.ItemCategory
+	decoder := json.NewDecoder(r.Body)
+	decoder.Decode(&category)
+	err := createCategory(category)
+
+	if err != nil {
+		data := models.Response{Err: 1, Message: err.Error(), Data: nil}
+		writeJSON(w, data)
+		return
+	}
+
+	data := models.Response{Err: 0, Message: "ok", Data: nil}
+	writeJSON(w, data)
+}
