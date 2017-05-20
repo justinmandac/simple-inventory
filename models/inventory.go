@@ -10,3 +10,10 @@ type ItemCategory struct {
 	ID       int           `json:"id"`
 	ParentID sql.NullInt64 `json:"parentId"`
 }
+
+// Item - an Inventory Item
+type Item struct {
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
