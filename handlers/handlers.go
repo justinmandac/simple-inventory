@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"simple-inventory/models"
 
-	"log"
-
 	_ "github.com/go-sql-driver/mysql" // Import mysql driver
 )
 
@@ -45,29 +43,37 @@ func MainHandler(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, data)
 }
 
-// GetCategoriesHandler returns a list of categories
-func GetCategoriesHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("GET /categories. GET params were: ", r.URL.Query())
-	var arr []models.ItemCategory
-
+func getCategories() (categories []models.ItemCategory, err error) {
 	rows, err := db.Query("SELECT * FROM categories;")
 
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var id int
-		var name string
-		var parentID sql.NullInt64
-		err := rows.Scan(&id, &name, &parentID)
+		var read models.ItemCategory
+		err = rows.Scan(&read.ID, &read.Name, &read.ParentID)
 
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 
-		arr = append(arr, models.ItemCategory{Name: name, ID: id, ParentID: parentID})
+		categories = append(categories, read)
+	}
+
+	return
+}
+
+// GetCategoriesHandler returns a list of categories
+func GetCategoriesHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("GET /categories. GET params were: ", r.URL.Query())
+	arr, err := getCategories()
+
+	if err != nil {
+		data := models.Response{Err: 1, Message: err.Error(), Data: nil}
+		writeJSON(w, data)
+		return
 	}
 
 	data := models.Response{Err: 0, Message: "", Data: arr}
