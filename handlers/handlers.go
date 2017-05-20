@@ -60,7 +60,7 @@ func GetCategoriesHandler(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var id int
 		var name string
-		var parentID int
+		var parentID sql.NullInt64
 		err := rows.Scan(&id, &name, &parentID)
 
 		if err != nil {
