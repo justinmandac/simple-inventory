@@ -35,4 +35,22 @@ func (dao *ItemDao) GetItems() (items []models.Item, err error) {
 }
 
 // GetItem retrieves a specific item
-func (dao *ItemDao) GetItem() {}
+func (dao *ItemDao) GetItem(id int) (item models.Item, err error) {
+	query := "SELECT * from `items` WHERE id=?"
+	rows, err := dao.Db.Query(query, id)
+	defer rows.Close()
+
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		err = rows.Scan(&item.Name, &item.ID, &item.Description)
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return item, nil
+}
