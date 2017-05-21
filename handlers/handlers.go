@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"simple-inventory/dao"
 	"simple-inventory/models"
 
 	"strconv"
@@ -14,6 +15,7 @@ import (
 )
 
 var db *sql.DB
+var categoryDao dao.CategoryDao
 
 func init() {
 	var err error
@@ -21,6 +23,7 @@ func init() {
 	if err != nil {
 		panic(err.Error())
 	}
+	categoryDao = dao.CategoryDao{Db: db}
 }
 
 func writeJSON(w http.ResponseWriter, response models.Response) (err error) {
@@ -46,32 +49,10 @@ func MainHandler(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, data)
 }
 
-func getCategories() (categories []models.ItemCategory, err error) {
-	rows, err := db.Query("SELECT * FROM categories;")
-
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var read models.ItemCategory
-		err = rows.Scan(&read.ID, &read.Name, &read.ParentID)
-
-		if err != nil {
-			return nil, err
-		}
-
-		categories = append(categories, read)
-	}
-
-	return
-}
-
 // GetCategoriesHandler returns a list of categories
 func GetCategoriesHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("GET /categories. GET params were: ", r.URL.Query())
-	arr, err := getCategories()
+	arr, err := categoryDao.GetCategories()
 
 	if err != nil {
 		data := models.Response{Err: 1, Message: err.Error(), Data: nil}
@@ -83,24 +64,13 @@ func GetCategoriesHandler(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, data)
 }
 
-func createCategory(category models.ItemCategory) error {
-	query := "INSERT INTO `categories`(`name`, `parentID`) VALUES (?, ?)"
-	_, err := db.Exec(query, category.Name, category.ParentID)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // CreateCategoryHandler creates a new category.
 func CreateCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("POST /categories.")
 	var category models.ItemCategory
 	decoder := json.NewDecoder(r.Body)
 	decoder.Decode(&category)
-	err := createCategory(category)
+	err := categoryDao.CreateCategory(category)
 
 	if err != nil {
 		data := models.Response{Err: 1, Message: err.Error(), Data: nil}
@@ -110,17 +80,6 @@ func CreateCategoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	data := models.Response{Err: 0, Message: "ok", Data: nil}
 	writeJSON(w, data)
-}
-
-func deleteCategory(id int) error {
-	query := "DELETE FROM `categories` WHERE id=?"
-	_, err := db.Query(query, id)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // DeleteCategoryHandler - deletes category
@@ -128,7 +87,7 @@ func DeleteCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("DELETE /categories")
 	vars := mux.Vars(r)
 	id, _ := strconv.ParseInt(vars["id"], 10, 64) // the category id
-	err := deleteCategory(int(id))
+	err := categoryDao.DeleteCategory(int(id))
 
 	if err != nil {
 		data := models.Response{Err: 1, Message: err.Error(), Data: nil}
@@ -138,18 +97,6 @@ func DeleteCategoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	data := models.Response{Err: 0, Message: "ok", Data: nil}
 	writeJSON(w, data)
-}
-
-func updateCategory(id int, category models.ItemCategory) error {
-	// TODO: Throw error if category.ID != id
-	query := "UPDATE `categories`SET `parentID`=? WHERE `id`=?"
-	_, err := db.Query(query, category.ParentID, id)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // UpdateCategoryHandler - updates a category
@@ -162,7 +109,7 @@ func UpdateCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(vars["id"], 10, 64) // the category id
 
 	fmt.Println("Update category id:", id)
-	err := updateCategory(int(id), category)
+	err := categoryDao.UpdateCategory(int(id), category)
 
 	if err != nil {
 		data := models.Response{Err: 1, Message: err.Error(), Data: nil}
@@ -174,23 +121,11 @@ func UpdateCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, data)
 }
 
-func getCategory(id int) (cat models.ItemCategory, err error) {
-	query := "SELECT * FROM `categories` WHERE id=?"
-	rows, err := db.Query(query, id)
-	defer rows.Close()
-
-	for rows.Next() {
-		rows.Scan(&cat.ID, &cat.Name, &cat.ParentID)
-	}
-
-	return cat, nil
-}
-
 // GetCategoryHandler - gets a single categotry
 func GetCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.ParseInt(vars["id"], 10, 64)
-	category, err := getCategory(int(id))
+	category, err := categoryDao.GetCategory(int(id))
 
 	if err != nil {
 		data := models.Response{Err: 1, Message: err.Error(), Data: nil}
