@@ -173,3 +173,30 @@ func UpdateCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	data := models.Response{Err: 0, Message: "ok", Data: nil}
 	writeJSON(w, data)
 }
+
+func getCategory(id int) (cat models.ItemCategory, err error) {
+	query := "SELECT * FROM `categories` WHERE id=?"
+	rows, err := db.Query(query, id)
+	defer rows.Close()
+
+	for rows.Next() {
+		rows.Scan(&cat.ID, &cat.Name, &cat.ParentID)
+	}
+
+	return cat, nil
+}
+
+// GetCategoryHandler - gets a single categotry
+func GetCategoryHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, _ := strconv.ParseInt(vars["id"], 10, 64)
+	category, err := getCategory(int(id))
+
+	if err != nil {
+		data := models.Response{Err: 1, Message: err.Error(), Data: nil}
+		writeJSON(w, data)
+		return
+	}
+	data := models.Response{Err: 0, Message: "ok", Data: category}
+	writeJSON(w, data)
+}
