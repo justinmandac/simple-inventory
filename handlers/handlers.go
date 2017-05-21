@@ -129,6 +129,41 @@ func DeleteCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.ParseInt(vars["id"], 10, 64) // the category id
 	err := deleteCategory(int(id))
+
+	if err != nil {
+		data := models.Response{Err: 1, Message: err.Error(), Data: nil}
+		writeJSON(w, data)
+		return
+	}
+
+	data := models.Response{Err: 0, Message: "ok", Data: nil}
+	writeJSON(w, data)
+}
+
+func updateCategory(id int, category models.ItemCategory) error {
+	// TODO: Throw error if category.ID != id
+	query := "UPDATE `categories`SET `parentID`=? WHERE `id`=?"
+	_, err := db.Query(query, category.ParentID, id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// UpdateCategoryHandler - updates a category
+func UpdateCategoryHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("PUT /categories")
+	var category models.ItemCategory
+	decoder := json.NewDecoder(r.Body)
+	decoder.Decode(&category)
+	vars := mux.Vars(r)
+	id, _ := strconv.ParseInt(vars["id"], 10, 64) // the category id
+
+	fmt.Println("Update category id:", id)
+	err := updateCategory(int(id), category)
+
 	if err != nil {
 		data := models.Response{Err: 1, Message: err.Error(), Data: nil}
 		writeJSON(w, data)

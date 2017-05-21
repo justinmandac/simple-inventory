@@ -15,6 +15,7 @@ func main() {
 	r.HandleFunc("/api/categories", handlers.GetCategoriesHandler).Methods("GET")
 	r.HandleFunc("/api/categories", handlers.CreateCategoryHandler).Methods("POST")
 	r.HandleFunc("/api/categories/{id}", handlers.DeleteCategoryHandler).Methods("DELETE")
+	r.HandleFunc("/api/categories/{id}", handlers.UpdateCategoryHandler).Methods("PUT")
 
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(":8080", nil))
