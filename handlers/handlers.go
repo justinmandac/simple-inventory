@@ -135,3 +135,9 @@ func GetCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	data := models.Response{Err: 0, Message: "ok", Data: category}
 	writeJSON(w, data)
 }
+
+// GetItemsHandler retrieves the list of all items
+func GetItemsHandler(w http.ResponseWriter, r *http.Request) {}
+
+// GetItemHandler handler for retrieving a single item
+func GetItemHandler(w http.ResponseWriter, r *http.Request) {}
