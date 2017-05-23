@@ -54,3 +54,13 @@ func (dao *ItemDao) GetItem(id int) (item *models.Item, err error) {
 
 	return item, nil
 }
+
+// CreateItem creates a new entry in the `items` table
+func (dao *ItemDao) CreateItem(item models.Item) {
+
+}
+
+// SetCategories assigns categories to an item
+func (dao *ItemDao) SetCategories(itemID int, ids []int) {
+
+}

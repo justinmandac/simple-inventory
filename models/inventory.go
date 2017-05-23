@@ -13,7 +13,10 @@ type ItemCategory struct {
 
 // Item - an Inventory Item
 type Item struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	ID          int            `json:"id"`
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	Categories  []ItemCategory `json:"categories"`
+	Stock       int            `json:"stock"`
+	Price       float32        `json:"price"` // Price per unit
 }
