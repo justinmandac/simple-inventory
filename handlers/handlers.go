@@ -16,6 +16,7 @@ import (
 
 var db *sql.DB
 var categoryDao dao.CategoryDao
+var itemDao dao.ItemDao
 
 func init() {
 	var err error
@@ -24,6 +25,7 @@ func init() {
 		panic(err.Error())
 	}
 	categoryDao = dao.CategoryDao{Db: db}
+	itemDao = dao.ItemDao{Db: db}
 }
 
 func writeJSON(w http.ResponseWriter, response models.Response) (err error) {
@@ -137,7 +139,21 @@ func GetCategoryHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetItemsHandler retrieves the list of all items
-func GetItemsHandler(w http.ResponseWriter, r *http.Request) {}
+func GetItemsHandler(w http.ResponseWriter, r *http.Request) {
+	var item models.Item
+	decoder := json.NewDecoder(r.Body)
+	decoder.Decode(&item)
+
+	err := itemDao.CreateItem(item)
+
+	if err != nil {
+		data := models.Response{Err: 1, Message: err.Error(), Data: nil}
+		writeJSON(w, data)
+		return
+	}
+	data := models.Response{Err: 0, Message: "ok", Data: nil}
+	writeJSON(w, data)
+}
 
 // GetItemHandler handler for retrieving a single item
 func GetItemHandler(w http.ResponseWriter, r *http.Request) {}

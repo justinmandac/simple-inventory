@@ -56,8 +56,15 @@ func (dao *ItemDao) GetItem(id int) (item *models.Item, err error) {
 }
 
 // CreateItem creates a new entry in the `items` table
-func (dao *ItemDao) CreateItem(item models.Item) {
+func (dao *ItemDao) CreateItem(item models.Item) error {
+	query := "INSERT INTO `items`(`name`, `description`) VALUES (?, ?)"
+	_, err := dao.Db.Query(query, item.Name, item.Description)
 
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // SetCategories assigns categories to an item
