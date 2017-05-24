@@ -19,6 +19,7 @@ func main() {
 	r.HandleFunc("/api/categories/{id}", handlers.GetCategoryHandler).Methods("GET")
 
 	r.HandleFunc("/api/items", handlers.GetItemsHandler).Methods("GET")
+	r.HandleFunc("/api/items", handlers.CreateItemHandler).Methods("POST")
 	r.HandleFunc("/api/items/{id}", handlers.GetItemHandler).Methods("GET")
 
 	http.Handle("/", r)

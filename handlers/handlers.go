@@ -139,7 +139,13 @@ func GetCategoryHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetItemsHandler retrieves the list of all items
-func GetItemsHandler(w http.ResponseWriter, r *http.Request) {
+func GetItemsHandler(w http.ResponseWriter, r *http.Request) {}
+
+// GetItemHandler handler for retrieving a single item
+func GetItemHandler(w http.ResponseWriter, r *http.Request) {}
+
+// CreateItemHandler creates a new item
+func CreateItemHandler(w http.ResponseWriter, r *http.Request) {
 	var item models.Item
 	decoder := json.NewDecoder(r.Body)
 	decoder.Decode(&item)
@@ -154,6 +160,3 @@ func GetItemsHandler(w http.ResponseWriter, r *http.Request) {
 	data := models.Response{Err: 0, Message: "ok", Data: nil}
 	writeJSON(w, data)
 }
-
-// GetItemHandler handler for retrieving a single item
-func GetItemHandler(w http.ResponseWriter, r *http.Request) {}
