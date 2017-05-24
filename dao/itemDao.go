@@ -80,6 +80,8 @@ func (dao *ItemDao) CreateItem(item models.Item) error {
 			}
 		}
 	}
+	// TODO : Set initial stock
+	// TODO : Set price per unit
 
 	return nil
 }
