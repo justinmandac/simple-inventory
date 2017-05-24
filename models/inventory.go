@@ -24,6 +24,7 @@ type Item struct {
 // ItemStock - Stock information
 type ItemStock struct {
 	ID       int     `json:"id"`
+	ItemID   int     `json:"itemId"`
 	Unit     string  `json:"unit"`
 	Quantity float32 `json:"quantity"`
 }
