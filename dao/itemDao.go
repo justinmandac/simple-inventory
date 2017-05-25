@@ -62,6 +62,62 @@ func (dao *ItemDao) GetItem(id int) (item *models.Item, err error) {
 	return item, nil
 }
 
+// SetCategories assigns categories to an item
+func (dao *ItemDao) SetCategories(itemID int, categories []models.ItemCategory) []error {
+
+	errs := dao.mapCategories(itemID, categories)
+
+	if len(errs) > 0 {
+		return errs
+	}
+
+	return nil
+}
+
+func (dao *ItemDao) mapCategories(itemID int, categories []models.ItemCategory) []error {
+	var errs []error
+	catLength := len(categories)
+	query := "INSERT INTO `categories_map`(`item_id`, `category_id`) VALUES (? , ?);"
+	// Query for checking if the category to be inserted exists
+	chckQuery := "SELECT id FROM `categories` WHERE `id`= ?;"
+
+	if catLength > 0 {
+		for i := 0; i < catLength; i++ {
+			currCat := categories[i]
+			// Check if category exists
+			rows, err := dao.Db.Query(chckQuery, currCat.ID)
+
+			if err != nil {
+				errs = append(errs, err)
+			}
+
+			if !rows.Next() {
+				conv := strconv.FormatInt(int64(currCat.ID), 10)
+				errs = append(errs, errors.New("Category does not exist : "+conv))
+			} else {
+				// TODO: Perform checks if the itemID-categoryID pair already exists
+				_, err = dao.Db.Exec(query, itemID, currCat.ID)
+
+				if err != nil {
+					// Fatally exit
+					errs = append(errs, err)
+					return errs
+				}
+			}
+
+		}
+	} else {
+		errs = append(errs, errors.New("Empty data provided"))
+		return errs
+	}
+
+	if len(errs) > 0 {
+		return errs
+	}
+
+	return nil
+}
+
 // CreateItem creates a new entry in the `items` table
 func (dao *ItemDao) CreateItem(item models.Item) error {
 	query := "INSERT INTO `items`(`name`, `description`) VALUES (?, ?)"
@@ -75,51 +131,9 @@ func (dao *ItemDao) CreateItem(item models.Item) error {
 	fmt.Println("Inserted item id: ", id)
 
 	// Map to categories if item.Categories contains elements
-	if len(item.Categories) > 0 {
-		catQuery := "INSERT INTO `categories_map`(`item_id`, `category_id`) VALUES (? , ?);"
-		for i := 0; i < len(item.Categories); i++ {
-			currCat := item.Categories[i]
-			_, err := dao.Db.Exec(catQuery, id, currCat.ID)
-
-			if err != nil {
-				return nil
-			}
-		}
-	}
+	dao.mapCategories(item.ID, item.Categories)
 	// TODO : Set initial stock
 	// TODO : Set price per unit
-
-	return nil
-}
-
-// SetCategories assigns categories to an item
-func (dao *ItemDao) SetCategories(itemID int, categories []models.ItemCategory) []error {
-	var errs []error
-	query := "INSERT INTO `categories_map`(`item_id`, `category_id`) VALUES (?, ?);"
-	catQuery := "SELECT id FROM `categories` WHERE `id`= ?;"
-
-	if len(categories) > 0 {
-		for i := 0; i < len(categories); i++ {
-			// Check if category exists
-			rows, err := dao.Db.Query(catQuery, categories[i].ID)
-
-			if !rows.Next() {
-				conv := strconv.FormatInt(int64(categories[i].ID), 10)
-				errs = append(errs, errors.New("Category does not exist : "+conv))
-			} else {
-				// Only write to categories_map if category exists
-				_, err = dao.Db.Exec(query, itemID, categories[i].ID)
-
-				if err != nil {
-					errs = append(errs, err)
-				}
-			}
-		}
-	}
-
-	if len(errs) > 0 {
-		return errs
-	}
 
 	return nil
 }
