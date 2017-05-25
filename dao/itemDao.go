@@ -1,3 +1,7 @@
+// Package dao provides Data Access Objects for abstracting accesses to the
+// Data layers
+// TODO : Create method for removing item categories
+
 package dao
 
 import (
