@@ -2,8 +2,10 @@ package dao
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"simple-inventory/models"
+	"strconv"
 )
 
 // ItemDao Data Access Object for items
@@ -87,6 +89,33 @@ func (dao *ItemDao) CreateItem(item models.Item) error {
 }
 
 // SetCategories assigns categories to an item
-func (dao *ItemDao) SetCategories(itemID int, ids []int) {
+func (dao *ItemDao) SetCategories(itemID int, categories []models.ItemCategory) []error {
+	var errs []error
+	query := "INSERT INTO `categories_map`(`item_id`, `category_id`) VALUES (?, ?);"
+	catQuery := "SELECT id FROM `categories` WHERE `id`= ?;"
 
+	if len(categories) > 0 {
+		for i := 0; i < len(categories); i++ {
+			// Check if category exists
+			rows, err := dao.Db.Query(catQuery, categories[i].ID)
+
+			if !rows.Next() {
+				conv := strconv.FormatInt(int64(categories[i].ID), 10)
+				errs = append(errs, errors.New("Category does not exist : "+conv))
+			} else {
+				// Only write to categories_map if category exists
+				_, err = dao.Db.Exec(query, itemID, categories[i].ID)
+
+				if err != nil {
+					errs = append(errs, err)
+				}
+			}
+		}
+	}
+
+	if len(errs) > 0 {
+		return errs
+	}
+
+	return nil
 }
