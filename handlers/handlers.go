@@ -33,7 +33,7 @@ func writeJSON(w http.ResponseWriter, response models.Response) (err error) {
 
 	w.Header().Set("content-type", "application/json")
 	if err != nil {
-		data := models.Response{Err: 1, Message: err.Error(), Data: nil}
+		data := models.Response{Err: 1, Message: []string{err.Error()}, Data: nil}
 		errRes, _ := json.Marshal(data)
 		w.Write(errRes)
 		return err
@@ -46,7 +46,7 @@ func writeJSON(w http.ResponseWriter, response models.Response) (err error) {
 // MainHandler accepts requests pointed to "/"
 func MainHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Main Handled")
-	data := models.Response{Err: 0, Message: "ok", Data: nil}
+	data := models.Response{Err: 0, Message: []string{}, Data: nil}
 
 	writeJSON(w, data)
 }
@@ -57,12 +57,12 @@ func GetCategoriesHandler(w http.ResponseWriter, r *http.Request) {
 	arr, err := categoryDao.GetCategories()
 
 	if err != nil {
-		data := models.Response{Err: 1, Message: err.Error(), Data: nil}
+		data := models.Response{Err: 1, Message: []string{err.Error()}, Data: nil}
 		writeJSON(w, data)
 		return
 	}
 
-	data := models.Response{Err: 0, Message: "", Data: arr}
+	data := models.Response{Err: 0, Message: []string{}, Data: arr}
 	writeJSON(w, data)
 }
 
@@ -75,12 +75,12 @@ func CreateCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	err := categoryDao.CreateCategory(category)
 
 	if err != nil {
-		data := models.Response{Err: 1, Message: err.Error(), Data: nil}
+		data := models.Response{Err: 1, Message: []string{err.Error()}, Data: nil}
 		writeJSON(w, data)
 		return
 	}
 
-	data := models.Response{Err: 0, Message: "ok", Data: nil}
+	data := models.Response{Err: 0, Message: []string{}, Data: nil}
 	writeJSON(w, data)
 }
 
@@ -92,12 +92,12 @@ func DeleteCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	err := categoryDao.DeleteCategory(int(id))
 
 	if err != nil {
-		data := models.Response{Err: 1, Message: err.Error(), Data: nil}
+		data := models.Response{Err: 1, Message: []string{err.Error()}, Data: nil}
 		writeJSON(w, data)
 		return
 	}
 
-	data := models.Response{Err: 0, Message: "ok", Data: nil}
+	data := models.Response{Err: 0, Message: []string{}, Data: nil}
 	writeJSON(w, data)
 }
 
@@ -114,12 +114,12 @@ func UpdateCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	err := categoryDao.UpdateCategory(int(id), category)
 
 	if err != nil {
-		data := models.Response{Err: 1, Message: err.Error(), Data: nil}
+		data := models.Response{Err: 1, Message: []string{err.Error()}, Data: nil}
 		writeJSON(w, data)
 		return
 	}
 
-	data := models.Response{Err: 0, Message: "ok", Data: nil}
+	data := models.Response{Err: 0, Message: []string{}, Data: nil}
 	writeJSON(w, data)
 }
 
@@ -130,11 +130,11 @@ func GetCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	category, err := categoryDao.GetCategory(int(id))
 
 	if err != nil {
-		data := models.Response{Err: 1, Message: err.Error(), Data: nil}
+		data := models.Response{Err: 1, Message: []string{err.Error()}, Data: nil}
 		writeJSON(w, data)
 		return
 	}
-	data := models.Response{Err: 0, Message: "ok", Data: category}
+	data := models.Response{Err: 0, Message: []string{}, Data: category}
 	writeJSON(w, data)
 }
 
@@ -153,10 +153,35 @@ func CreateItemHandler(w http.ResponseWriter, r *http.Request) {
 	err := itemDao.CreateItem(item)
 
 	if err != nil {
-		data := models.Response{Err: 1, Message: err.Error(), Data: nil}
+		data := models.Response{Err: 1, Message: []string{err.Error()}, Data: nil}
 		writeJSON(w, data)
 		return
 	}
-	data := models.Response{Err: 0, Message: "ok", Data: nil}
+	data := models.Response{Err: 0, Message: []string{}, Data: nil}
+	writeJSON(w, data)
+}
+
+// SetItemCategoriesHandler assigns categories to an item
+func SetItemCategoriesHandler(w http.ResponseWriter, r *http.Request) {
+	var item models.Item
+	vars := mux.Vars(r)
+	id, _ := strconv.ParseInt(vars["id"], 10, 64)
+	decoder := json.NewDecoder(r.Body)
+	decoder.Decode(&item)
+
+	err := itemDao.SetCategories(int(id), item.Categories)
+
+	if err != nil {
+		var stringErrs []string
+
+		for i := 0; i < len(err); i++ {
+			stringErrs = append(stringErrs, err[i].Error())
+		}
+
+		data := models.Response{Err: 1, Message: stringErrs, Data: nil}
+		writeJSON(w, data)
+		return
+	}
+	data := models.Response{Err: 0, Message: []string{}, Data: nil}
 	writeJSON(w, data)
 }
