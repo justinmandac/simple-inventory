@@ -64,14 +64,7 @@ func (dao *ItemDao) GetItem(id int) (item *models.Item, err error) {
 
 // SetCategories assigns categories to an item
 func (dao *ItemDao) SetCategories(itemID int, categories []models.ItemCategory) []error {
-
-	errs := dao.mapCategories(itemID, categories)
-
-	if len(errs) > 0 {
-		return errs
-	}
-
-	return nil
+	return dao.mapCategories(itemID, categories)
 }
 
 func (dao *ItemDao) mapCategories(itemID int, categories []models.ItemCategory) []error {
