@@ -42,21 +42,45 @@ func (dao *ItemDao) GetItems() (items []models.Item, err error) {
 }
 
 // GetItem retrieves a specific item
-func (dao *ItemDao) GetItem(id int) (item *models.Item, err error) {
-	query := "SELECT * from `items` WHERE id=?"
+func (dao *ItemDao) GetItem(id int) (item models.Item, err error) {
+	query := `SELECT * FROM items AS i
+	RIGHT JOIN stocks AS s ON i.id = s.item_id
+	WHERE i.id = ?`
+	catQuery := `SELECT c.id, c.name, c.parentID
+	FROM categories AS c RIGHT JOIN categories_map AS m
+	ON c.id = m.category_id WHERE m.item_id = ?;`
+
 	rows, err := dao.Db.Query(query, id)
 	defer rows.Close()
 
 	if err != nil {
-		return nil, err
+		return item, err
 	}
 
 	for rows.Next() {
-		err = rows.Scan(&item.Name, &item.ID, &item.Description)
+		err = rows.Scan(&item.ID, &item.Name, &item.Description, &item.Stock.ID, &item.Stock.ItemID, &item.Stock.Quantity)
 
 		if err != nil {
-			return nil, err
+			return item, err
 		}
+	}
+
+	rows, err = dao.Db.Query(catQuery, id)
+
+	if err != nil {
+		return item, err
+	}
+
+	for rows.Next() {
+		var cat models.ItemCategory
+
+		err = rows.Scan(&cat.ID, &cat.Name, &cat.ParentID)
+
+		if err != nil {
+			return item, err
+		}
+
+		item.Categories = append(item.Categories, cat)
 	}
 
 	return item, nil

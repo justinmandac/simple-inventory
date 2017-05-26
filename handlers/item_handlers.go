@@ -13,7 +13,21 @@ import (
 func GetItemsHandler(w http.ResponseWriter, r *http.Request) {}
 
 // GetItemHandler handler for retrieving a single item
-func GetItemHandler(w http.ResponseWriter, r *http.Request) {}
+func GetItemHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, _ := strconv.ParseInt(vars["id"], 10, 64)
+
+	item, err := itemDao.GetItem(int(id))
+
+	if err != nil {
+		data := models.Response{Err: 1, Message: []string{err.Error()}, Data: nil}
+		writeJSON(w, data)
+		return
+	}
+
+	data := models.Response{Err: 0, Message: []string{}, Data: item}
+	writeJSON(w, data)
+}
 
 // CreateItemHandler creates a new item
 func CreateItemHandler(w http.ResponseWriter, r *http.Request) {
