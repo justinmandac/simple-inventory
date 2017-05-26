@@ -17,7 +17,7 @@ type Item struct {
 	Name        string         `json:"name"`
 	Description string         `json:"description"`
 	Categories  []ItemCategory `json:"categories"`
-	Stock       float32        `json:"stock"`
+	Stock       ItemStock      `json:"stock"`
 	Price       float32        `json:"price"` // Price per unit
 }
 
@@ -25,6 +25,5 @@ type Item struct {
 type ItemStock struct {
 	ID       int     `json:"id"`
 	ItemID   int     `json:"itemId"`
-	Unit     string  `json:"unit"`
 	Quantity float32 `json:"quantity"`
 }

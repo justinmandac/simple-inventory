@@ -111,6 +111,35 @@ func (dao *ItemDao) mapCategories(itemID int, categories []models.ItemCategory) 
 	return nil
 }
 
+func (dao *ItemDao) mapItemStock(itemID int, stock models.ItemStock) []error {
+	var errs []error
+	query := "INSERT INTO `stocks`(`item_id`, `quantity`) VALUES (?, ?);"
+
+	_, err := dao.Db.Exec(query, itemID, stock.Quantity)
+
+	if err != nil {
+		errs = append(errs, err)
+		return errs
+	}
+
+	return nil
+}
+
+// SetItemStock updates an item's stock
+func (dao *ItemDao) SetItemStock(stock models.ItemStock) []error {
+	var errs []error
+	query := "UPDATE `stocks` SET `quantity` = ? WHERE `id` = ? AND `item_id` = ?;"
+
+	_, err := dao.Db.Exec(query, stock.Quantity, stock.ID, stock.ItemID)
+
+	if err != nil {
+		errs = append(errs, err)
+		return errs
+	}
+
+	return nil
+}
+
 // CreateItem creates a new entry in the `items` table
 func (dao *ItemDao) CreateItem(item models.Item) error {
 	query := "INSERT INTO `items`(`name`, `description`) VALUES (?, ?)"
@@ -124,8 +153,8 @@ func (dao *ItemDao) CreateItem(item models.Item) error {
 	fmt.Println("Inserted item id: ", id)
 
 	// Map to categories if item.Categories contains elements
-	dao.mapCategories(item.ID, item.Categories)
-	// TODO : Set initial stock
+	dao.mapCategories(int(id), item.Categories)
+	dao.mapItemStock(int(id), item.Stock)
 	// TODO : Set price per unit
 
 	return nil
