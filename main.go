@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"simple-inventory/handlers"
@@ -25,5 +26,6 @@ func main() {
 	r.HandleFunc("/api/items/{id}/stock/{stockID}", handlers.SetItemStockHandler).Methods("PUT")
 
 	http.Handle("/", r)
+	fmt.Println("Serving @ :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
