@@ -8,7 +8,7 @@ API Documentation
 
 #### GET `/`
 **Description**: Retrieves the list of all categories.
-##### Sample Response
+#####  Response
 **Success**:
 ```
 {
@@ -63,8 +63,54 @@ API Documentation
   "parentId" : null|integer
 }
 ```
-
+##### Response 
+**Success**:
+```
+{
+  "err" : 0,
+  "msg" : [],
+  "data" : null
+}
+```
+**Error**:
+```
+{
+  "err" : 1,
+  "msg" : [
+    "Message",
+    ...
+  ],
+  "data" : null
+}
+```
 #### GET `/{id}`
+##### Response
+**Success**
+```
+{
+  "err" : 0,
+  "msg" : [],
+  "data" : {
+    "name" : "foo category",
+    "id" : 24,
+    "parentId" : {
+      "Int64" : 0,
+      "Valid" : false
+    }
+  }
+}
+```
+**Error**:
+```
+{
+  "err" : 1,
+  "msg" : [
+    "Message",
+    ...
+  ],
+  "data" : null
+}
+```
 #### PUT `/{id}`
 #### DELETE `/{id}`
 
